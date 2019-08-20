@@ -9,6 +9,8 @@
 
 #include <libnetfilter_queue/libnetfilter_queue.h>
 
+#include "protocol_structure.h"
+
 char ** global_argv = nullptr;
 int global_Is_Not_harmful = 1;
 
@@ -75,32 +77,39 @@ static u_int32_t print_pkt (struct nfq_data *tb)
     
     //----------------------------------------------------------------
 
-    u_char str_host[] = "Host: "; 
+    u_char str_host[] = "Host: ";
 
+    Ip * ip_header = (Ip *)data;
 
-    int i = 0;
-    while(i < ret - 5)
+    if(ip_header->protocol == IPPROTO_TCP)
     {
-        if(!memcmp(&data[i], str_host, sizeof(str_host) - 1))
+        int i = 0;
+        while(i < ret - 5)
         {
-            break;
+            if(!memcmp(&data[i], str_host, sizeof(str_host) - 1))
+            {
+                break;
+            }
+            i++;
         }
-        i++;
-    }
 
-    char * block_str = global_argv[1];
-    char * packet_str = (char *)&data[i + sizeof(str_host) - 1];
+        char * block_str = global_argv[1];
+        char * packet_str = (char *)&data[i + sizeof(str_host) - 1];
 
-    if(!memcmp(block_str, packet_str, sizeof(block_str) - 1))
-    {
-        printf("\n\nharmful website!\n");
-        global_Is_Not_harmful = 0;
+        if(!memcmp(block_str, packet_str, sizeof(block_str) - 1))
+        {
+            printf("\n\nharmful website!\n");
+            global_Is_Not_harmful = 0;
+        }
+        else
+        {
+            global_Is_Not_harmful = 1;
+        }
     }
     else
     {
         global_Is_Not_harmful = 1;
     }
-
     //----------------------------------------------------------------
 
     fputc('\n', stdout);

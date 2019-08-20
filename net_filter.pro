@@ -5,3 +5,6 @@ CONFIG -= qt
 LIBS += -lnetfilter_queue
 SOURCES += \
         main.cpp
+
+HEADERS += \
+    protocol_structure.h
