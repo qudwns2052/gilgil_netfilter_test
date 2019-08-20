@@ -73,20 +73,26 @@ static u_int32_t print_pkt (struct nfq_data *tb)
     ret = nfq_get_payload(tb, &data);
     if (ret >= 0)
         printf("payload_len=%d ", ret);
-    dump(data, ret);
+    //dump(data, ret);
     
     //----------------------------------------------------------------
 
     u_char str_host[] = "Host: ";
-
     Ip * ip_header = (Ip *)data;
+    int ip_hlen = (ip_header->VHL & 0x0f) * 4;
+    Tcp * tcp_header = (Tcp *)(data + ip_hlen);
+    int tcp_hlen = ((tcp_header->OFF & 0xf0) >> 4) * 4;
 
-    if(ip_header->protocol == IPPROTO_TCP)
+    u_char * payload = data + ip_hlen + tcp_hlen;
+    int payload_len = ntohs(ip_header->Total_LEN) - (ip_hlen + tcp_hlen);
+
+
+    if(ip_header->protocol == IPPROTO_TCP && payload_len > 3 && !memcmp(payload, "GET", 3))
     {
         int i = 0;
         while(i < ret - 5)
         {
-            if(!memcmp(&data[i], str_host, sizeof(str_host) - 1))
+            if(!memcmp(payload + i, str_host, sizeof(str_host) - 1))
             {
                 break;
             }
@@ -94,7 +100,8 @@ static u_int32_t print_pkt (struct nfq_data *tb)
         }
 
         char * block_str = global_argv[1];
-        char * packet_str = (char *)&data[i + sizeof(str_host) - 1];
+        char * packet_str = (char *)(payload + i + sizeof(str_host) - 1);
+
 
         if(!memcmp(block_str, packet_str, sizeof(block_str) - 1))
         {
