@@ -72,9 +72,10 @@ static u_int32_t print_pkt (struct nfq_data *tb)
     if (ret >= 0)
         printf("payload_len=%d ", ret);
     dump(data, ret);
-    //
+    
+    //----------------------------------------------------------------
 
-    u_char str_host[] = "Host: ";    //reverse HOST
+    u_char str_host[] = "Host: "; 
 
 
     int i = 0;
@@ -100,7 +101,8 @@ static u_int32_t print_pkt (struct nfq_data *tb)
         global_Is_Not_harmful = 1;
     }
 
-    //
+    //----------------------------------------------------------------
+
     fputc('\n', stdout);
 
     return id;
