@@ -103,7 +103,7 @@ static u_int32_t print_pkt (struct nfq_data *tb)
         char * packet_str = (char *)(payload + i + sizeof(str_host) - 1);
 
 
-        if(!memcmp(block_str, packet_str, sizeof(block_str) - 1))
+        if(!memcmp(block_str, packet_str, strlen(block_str)))
         {
             printf("\n\nharmful website!\n");
             global_Is_Not_harmful = 0;
